@@ -1,0 +1,15 @@
+# 올리면 안 되는 파일 (지우지 마세요)
+.DS_Store
+Thumbs.db
+desktop.ini
+.env
+.env.*
+*.key
+*.pem
+node_modules/
+*.zip
+*.psd
+*.ai
+*.pie
+*.fig
+~$*

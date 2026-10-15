@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실습 아카이브</title>
+<!-- 이 페이지는 data/works.js 를 읽어 92줄 × 2칸 격자를 그립니다. 내용을 바꾸려면 works.js 를 고치세요. -->
+<style>
+  :root{
+    --bg:#f4f4f1; --card:#ffffff; --ink:#1b1a17; --muted:#6d6a62; --line:#dcdad3;
+    --done:#1d6b46; --done-bg:#e3f1e9; --mine:#3048c9; --mine-bg:#e7ebff; --empty:#efeee9;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141412; --card:#1d1c19; --ink:#ecebe6; --muted:#a3a097; --line:#34322d;
+      --done:#7fd3a6; --done-bg:#183326; --mine:#9fb0ff; --mine-bg:#1f2648; --empty:#24231f; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;font-size:15px;line-height:1.55;word-break:keep-all;overflow-wrap:break-word}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 20px 80px}
+  header{display:grid;gap:8px;margin-bottom:24px}
+  h1{margin:0;font-size:clamp(26px,5vw,40px);letter-spacing:-0.02em}
+  .sub{color:var(--muted);margin:0}
+  .count{display:flex;flex-wrap:wrap;gap:8px 20px;font-variant-numeric:tabular-nums}
+  .count b{font-size:20px}
+  .bar{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 8px}
+  .bar button{font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+  .bar button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  h2{font-size:16px;margin:28px 0 8px;color:var(--muted);font-weight:600}
+  .row{display:grid;grid-template-columns:44px minmax(0,1fr) 120px 120px;gap:8px;align-items:center;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:8px;margin-bottom:6px}
+  .no{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+  .title{min-width:0}
+  .title small{display:block;color:var(--muted);font-size:12px}
+  .cell{display:block;text-align:center;font-size:13px;padding:6px 4px;border-radius:6px;background:var(--empty);color:var(--muted);text-decoration:none}
+  a.cell.f{background:var(--done-bg);color:var(--done);font-weight:600}
+  a.cell.m{background:var(--mine-bg);color:var(--mine);font-weight:600}
+  a.cell:focus-visible,.bar button:focus-visible{outline:2px solid var(--mine);outline-offset:2px}
+  .head{display:grid;grid-template-columns:44px minmax(0,1fr) 120px 120px;gap:8px;padding:0 10px;font-size:12px;color:var(--muted)}
+  .head span:nth-child(n+3){text-align:center}
+  @media (max-width:560px){
+    .row,.head{grid-template-columns:34px minmax(0,1fr) 72px 72px}
+    .cell{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="name">실습 아카이브</h1>
+    <p class="sub">스마트 인터랙션 디자인 · 카탈로그 92개를 따라 하고, 내 방식으로 응용한 기록</p>
+    <div class="count" id="count"></div>
+  </header>
+  <div class="bar" role="group" aria-label="보기 선택">
+    <button type="button" data-f="all" aria-pressed="true">전체</button>
+    <button type="button" data-f="done" aria-pressed="false">한 것만</button>
+    <button type="button" data-f="p1" aria-pressed="false">1부 인터랙션</button>
+    <button type="button" data-f="p2" aria-pressed="false">2부 모션</button>
+  </div>
+  <div class="head" aria-hidden="true"><span>번호</span><span>이름</span><span>따라 하기</span><span>내 응용</span></div>
+  <main id="list"></main>
+</div>
+<script src="data/works.js"></script>
+<script>
+  const W = window.WORKS;
+  const pad = n => String(n).padStart(2, "0");
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  if (W.student && W.student.name) { document.getElementById("name").textContent = W.student.name + " · 실습 아카이브"; document.title = W.student.name + " · 실습 아카이브"; }
+  const f = W.items.filter(i => i.follow.done).length, m = W.items.filter(i => i.mine.done).length;
+  document.getElementById("count").innerHTML = `<span>따라 하기 <b>${f}</b> / 92</span><span>내 응용 <b>${m}</b> / 92</span><span>합계 <b>${f + m}</b> / 184</span>`;
+  let filter = "all";
+  function cell(i, kind) {
+    const it = i[kind];
+    if (!it.done) return `<span class="cell">—</span>`;
+    const label = kind === "follow" ? (it.date || "완료") : (it.title || it.date || "완료");
+    return `<a class="cell ${kind === "follow" ? "f" : "m"}" href="works/${pad(i.no)}/${kind}/">${esc(label)}</a>`;
+  }
+  function render() {
+    const xs = W.items.filter(i =>
+      filter === "all" || (filter === "done" && (i.follow.done || i.mine.done)) ||
+      (filter === "p1" && i.part === 1) || (filter === "p2" && i.part === 2));
+    let html = "", cat = null;
+    for (const i of xs) {
+      if (i.cat !== cat) { cat = i.cat; html += `<h2>${esc(cat)}</h2>`; }
+      html += `<div class="row"><span class="no">${pad(i.no)}</span><span class="title">${esc(i.title)}${i.mine.changed ? `<small>바꾼 점: ${esc(i.mine.changed)}</small>` : ""}</span>${cell(i, "follow")}${cell(i, "mine")}</div>`;
+    }
+    document.getElementById("list").innerHTML = html || `<p class="sub">아직 올린 실습이 없습니다.</p>`;
+  }
+  document.querySelectorAll(".bar button").forEach(b => b.onclick = () => {
+    filter = b.dataset.f;
+    document.querySelectorAll(".bar button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  });
+  render();
+</script>
+</body>
+</html>
