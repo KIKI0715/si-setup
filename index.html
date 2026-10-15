@@ -46,7 +46,7 @@
 <div class="wrap">
   <header>
     <h1 id="name">실습 아카이브</h1>
-    <p class="sub">스마트 인터랙션 디자인 · 카탈로그 92개를 따라 하고, 내 방식으로 응용한 기록</p>
+    <p class="sub">스마트 인터랙션 디자인 · 카탈로그 97개를 따라 하고, 내 방식으로 응용한 기록</p>
     <div class="count" id="count"></div>
   </header>
   <div class="bar" role="group" aria-label="보기 선택">
@@ -65,7 +65,7 @@
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   if (W.student && W.student.name) { document.getElementById("name").textContent = W.student.name + " · 실습 아카이브"; document.title = W.student.name + " · 실습 아카이브"; }
   const f = W.items.filter(i => i.follow.done).length, m = W.items.filter(i => i.mine.done).length;
-  document.getElementById("count").innerHTML = `<span>따라 하기 <b>${f}</b> / 92</span><span>내 응용 <b>${m}</b> / 92</span><span>합계 <b>${f + m}</b> / 184</span>`;
+  document.getElementById("count").innerHTML = `<span>따라 하기 <b>${f}</b> / ${W.items.length}</span><span>내 응용 <b>${m}</b> / ${W.items.length}</span><span>합계 <b>${f + m}</b> / ${W.items.length * 2}</span>`;
   let filter = "all";
   function cell(i, kind) {
     const it = i[kind];
